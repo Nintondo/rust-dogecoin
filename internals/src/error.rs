@@ -1,4 +1,4 @@
-// Written by the Rust Bitcoin developers.
+// Written by the Rust Dogecoin developers.
 // SPDX-License-Identifier: CC0-1.0
 
 //! # Error

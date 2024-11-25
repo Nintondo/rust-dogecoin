@@ -1,7 +1,7 @@
-// Written by the Rust Bitcoin developers.
+// Written by the Rust Dogecoin developers.
 // SPDX-License-Identifier: CC0-1.0
 
-//! # Rust Bitcoin Internal
+//! # Rust Dogecoin Internal
 //!
 //! This crate is only meant to be used internally by crates in the
 //! [rust-bitcoin](https://github.com/rust-bitcoin) ecosystem.

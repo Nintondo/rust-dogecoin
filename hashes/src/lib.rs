@@ -1,4 +1,4 @@
-// Bitcoin Hashes Library
+// Dogecoin Hashes Library
 // Written in 2018 by
 //   Andrew Poelstra <apoelstra@wpsoftware.net>
 //
@@ -15,7 +15,7 @@
 //! Rust hashes library.
 //!
 //! This is a simple, no-dependency library which implements the hash functions
-//! needed by Bitcoin. These are SHA256, SHA256d, and RIPEMD160. As an ancillary
+//! needed by Dogecoin. These are SHA256, SHA256d, and RIPEMD160. As an ancillary
 //! thing, it exposes hexadecimal serialization and deserialization, since these
 //! are needed to display hashes anway.
 //!
@@ -211,7 +211,7 @@ pub trait Hash: Copy + Clone + PartialEq + Eq + PartialOrd + Ord +
     /// Returns an all zero hash.
     ///
     /// An all zeros hash is a made up construct because there is not a known input that can create
-    /// it, however it is used in various places in Bitcoin e.g., the Bitcoin genesis block's
+    /// it, however it is used in various places in Dogecoin e.g., the Dogecoin genesis block's
     /// previous blockhash and the coinbase transaction's outpoint txid.
     fn all_zeros() -> Self;
 }

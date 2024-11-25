@@ -1,4 +1,4 @@
-//! Various macros used by the Rust Bitcoin ecosystem.
+//! Various macros used by the Rust Dogecoin ecosystem.
 //!
 
 /// Implements standard array methods for a given wrapper type.

@@ -1,4 +1,4 @@
-// Bitcoin Hashes Library
+// Dogecoin Hashes Library
 // Written in 2019 by
 //   Andrew Poelstra <apoelstra@wpsoftware.net>
 //

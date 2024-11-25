@@ -1,4 +1,4 @@
-Rust Bitcoin Internals
+Rust Dogecoin Internals
 ======================
 
 This crate is only meant to be used internally by crates in the

@@ -1,10 +1,10 @@
 <div align="center">
-  <h1>Rust Bitcoin</h1>
+  <h1>Rust Dogecoin</h1>
 
-  <img alt="Rust Bitcoin logo by Hunter Trujillo, see license and source files under /logo" src="./logo/rust-bitcoin.png" width="300" />
+  <img alt="Rust Dogecoin logo by Hunter Trujillo, see license and source files under /logo" src="./logo/rust-bitcoin.png" width="300" />
 
   <p>Library with support for de/serialization, parsing and executing on data-structures
-    and network messages related to Bitcoin.
+    and network messages related to Dogecoin.
   </p>
 
   <p>
@@ -23,13 +23,13 @@
 
 Supports (or should support)
 
-* De/serialization of Bitcoin protocol network messages
+* De/serialization of Dogecoin protocol network messages
 * De/serialization of blocks and transactions
 * Script de/serialization
 * Private keys and address creation, de/serialization and validation (including full BIP32 support)
 * PSBT v0 de/serialization and all but the Input Finalizer role. Use [rust-miniscript](https://docs.rs/miniscript/latest/miniscript/psbt/index.html) to finalize.
 
-For JSONRPC interaction with Bitcoin Core, it is recommended to use
+For JSONRPC interaction with Dogecoin Core, it is recommended to use
 [rust-bitcoincore-rpc](https://github.com/rust-bitcoin/rust-bitcoincore-rpc).
 
 It is recommended to always use [cargo-crev](https://github.com/crev-dev/cargo-crev)
@@ -42,8 +42,8 @@ to verify the trustworthiness of each of your dependencies, including this one.
 This library **must not** be used for consensus code (i.e. fully validating
 blockchain data). It technically supports doing this, but doing so is very
 ill-advised because there are many deviations, known and unknown, between
-this library and the Bitcoin Core reference implementation. In a consensus
-based cryptocurrency such as Bitcoin it is critical that all parties are
+this library and the Dogecoin Core reference implementation. In a consensus
+based cryptocurrency such as Dogecoin it is critical that all parties are
 using the same rules to validate data, and this library is simply unable
 to implement the same rules as Core.
 
@@ -188,7 +188,7 @@ Alternatively add symlinks in your `.git/hooks` directory to any of the githooks
 
 ## Policy on Altcoins/Altchains
 
-Patches which add support for non-Bitcoin cryptocurrencies by adding constants
+Patches which add support for non-Dogecoin cryptocurrencies by adding constants
 to existing enums (e.g. to set the network message magic-byte sequence) are
 welcome. Anything more involved will be considered on a case-by-case basis,
 as the altcoin landscape includes projects which [frequently appear and

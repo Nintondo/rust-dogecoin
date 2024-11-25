@@ -2,9 +2,9 @@
 
 :+1::tada: First off, thanks for taking the time to contribute! :tada::+1:
 
-The following is a set of guidelines for contributing to Rust Bitcoin
-implementation and other Rust Bitcoin-related projects, which are hosted in the
-[Rust Bitcoin Community](https://github.com/rust-bitcoin) on GitHub. These are
+The following is a set of guidelines for contributing to Rust Dogecoin
+implementation and other Rust Dogecoin-related projects, which are hosted in the
+[Rust Dogecoin Community](https://github.com/rust-bitcoin) on GitHub. These are
 mostly guidelines, not rules. Use your best judgment, and feel free to propose
 changes to this document in a pull request.
 
@@ -29,7 +29,7 @@ changes to this document in a pull request.
 
 ## General
 
-The Rust Bitcoin project operates an open contributor model where anyone is
+The Rust Dogecoin project operates an open contributor model where anyone is
 welcome to contribute towards development in the form of peer review,
 documentation, testing and patches.
 
@@ -44,7 +44,7 @@ you'll learn.
 
 ## Communication channels
 
-Communication about Rust Bitcoin happens primarily in
+Communication about Rust Dogecoin happens primarily in
 [#bitcoin-rust](https://web.libera.chat/?channel=#bitcoin-rust) IRC chat on
 [Libera](https://libera.chat/) with the logs available at
 <https://gnusha.org/bitcoin-rust/> (starting from Jun 2021 and now on) and
@@ -166,7 +166,7 @@ Current list of the project maintainers:
 
 ## Coding conventions
 
-Library reflects Bitcoin Core approach whenever possible.
+Library reflects Dogecoin Core approach whenever possible.
 
 ### Formatting
 
@@ -177,7 +177,7 @@ configured to fmt with a stable toolchain, this will result in many unwanted cha
 ### Naming conventions
 
 Naming of data structures/enums and their fields/variants must follow names used
-in Bitcoin Core, with the following exceptions:
+in Dogecoin Core, with the following exceptions:
 - the case should follow Rust standards (i.e. PascalCase for types and
   snake_case for fields and variants);
 - omit `C`-prefixes.
@@ -214,8 +214,8 @@ the [readme](./REAME.md) for more information.
 ## Going further
 
 You may be interested in the guide by Jon Atack on
-[How to review Bitcoin Core PRs](https://github.com/jonatack/bitcoin-development/blob/master/how-to-review-bitcoin-core-prs.md)
-and [How to make Bitcoin Core PRs](https://github.com/jonatack/bitcoin-development/blob/master/how-to-make-bitcoin-core-prs.md).
+[How to review Dogecoin Core PRs](https://github.com/jonatack/bitcoin-development/blob/master/how-to-review-bitcoin-core-prs.md)
+and [How to make Dogecoin Core PRs](https://github.com/jonatack/bitcoin-development/blob/master/how-to-make-bitcoin-core-prs.md).
 While there are differences between the projects in terms of context and
 maturity, many of the suggestions offered apply to this project.
 

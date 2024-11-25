@@ -1,4 +1,4 @@
-// Bitcoin Hashes Library
+// Dogecoin Hashes Library
 // Written in 2022 by
 //   The rust-bitcoin developers.
 //
