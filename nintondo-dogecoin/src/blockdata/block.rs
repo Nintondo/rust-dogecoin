@@ -41,8 +41,8 @@ pub use crate::hash_types::BlockHash;
 ///
 /// * [CBlockHeader definition](https://github.com/bitcoin/bitcoin/blob/345457b542b6a980ccfbc868af0970a6f91d1b82/src/primitives/block.h#L20)
 #[derive(PartialEq, Eq, Clone, Debug, PartialOrd, Ord, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[cfg_attr(feature = "serde", serde(crate = "actual_serde"))]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Header {
     /// Block version, now repurposed for soft fork signalling.
     pub version: Version,
@@ -63,6 +63,7 @@ pub struct Header {
 /// A block header, which contains all the block's information except
 /// the actual transactions
 #[derive(PartialEq, Eq, Clone, Debug, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", serde(crate = "actual_serde"))]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct HeaderWithoutAuxPow {
     /// Block version, now repurposed for soft fork signalling.
@@ -91,8 +92,8 @@ impl_consensus_encoding!(
 
 /// An auxpow block metadata
 #[derive(PartialEq, Eq, Clone, Debug, PartialOrd, Ord, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[cfg_attr(feature = "serde", serde(crate = "actual_serde"))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AuxPow {
     /// The parent block's coinbase transaction.
     pub coinbase_tx: Transaction,
