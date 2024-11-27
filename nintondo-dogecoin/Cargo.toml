@@ -1,6 +1,6 @@
 [package]
 name = "nintondo-dogecoin"
-version = "0.30.4"
+version = "0.30.5"
 authors = ["Andrew Poelstra <apoelstra@wpsoftware.net>"]
 license = "CC0-1.0"
 repository = "https://github.com/nintondo/rust-dogecoin/"
