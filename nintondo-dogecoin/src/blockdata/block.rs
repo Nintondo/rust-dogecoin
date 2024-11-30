@@ -186,8 +186,19 @@ impl Header {
     /// Returns the block hash.
     pub fn block_hash(&self) -> BlockHash {
         let mut engine = BlockHash::engine();
-        self.consensus_encode(&mut engine).expect("engines don't error");
+        self.drop_auxpow().consensus_encode(&mut engine).expect("engines don't error");
         BlockHash::from_engine(engine)
+    }
+
+    fn drop_auxpow(&self) -> HeaderWithoutAuxPow {
+        HeaderWithoutAuxPow {
+            version: self.version,
+            prev_blockhash: self.prev_blockhash,
+            merkle_root: self.merkle_root,
+            time: self.time,
+            bits: self.bits,
+            nonce: self.nonce,
+        }
     }
 
     /// Computes the target (range [0, T] inclusive) that a blockhash must land in to be valid.
