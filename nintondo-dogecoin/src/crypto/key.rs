@@ -8,18 +8,18 @@
 
 use crate::prelude::*;
 
-use core::{ops, str::FromStr};
 use core::fmt::{self, Write};
+use core::{ops, str::FromStr};
 
 use bitcoin_internals::write_err;
 
-pub use secp256k1::{self, constants, Secp256k1, KeyPair, XOnlyPublicKey, Verification, Parity};
+pub use secp256k1::{self, constants, KeyPair, Parity, Secp256k1, Verification, XOnlyPublicKey};
 
-use crate::{base58, io};
-use crate::network::constants::Network;
-use crate::hashes::{Hash, hash160, hex, hex::FromHex};
 use crate::hash_types::{PubkeyHash, WPubkeyHash};
+use crate::hashes::{hash160, hex, hex::FromHex, Hash};
+use crate::network::constants::Network;
 use crate::taproot::{TapNodeHash, TapTweakHash};
+use crate::{base58, io};
 
 /// A key-related error.
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
@@ -44,7 +44,9 @@ impl fmt::Display for Error {
             Error::Secp256k1(ref e) => write_err!(f, "key secp256k1 error"; e),
             Error::InvalidKeyPrefix(ref b) => write!(f, "key prefix invalid: {}", b),
             Error::Hex(ref e) => write_err!(f, "key hex decoding error"; e),
-            Error::InvalidHexLength(got) => write!(f, "PublicKey hex should be 66 or 130 digits long, got: {}", got),
+            Error::InvalidHexLength(got) => {
+                write!(f, "PublicKey hex should be 66 or 130 digits long, got: {}", got)
+            }
         }
     }
 }
@@ -85,7 +87,6 @@ impl From<hex::Error> for Error {
     }
 }
 
-
 /// A Dogecoin ECDSA public key
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct PublicKey {
@@ -98,19 +99,13 @@ pub struct PublicKey {
 impl PublicKey {
     /// Constructs compressed ECDSA public key from the provided generic Secp256k1 public key
     pub fn new(key: impl Into<secp256k1::PublicKey>) -> PublicKey {
-        PublicKey {
-            compressed: true,
-            inner: key.into(),
-        }
+        PublicKey { compressed: true, inner: key.into() }
     }
 
     /// Constructs uncompressed (legacy) ECDSA public key from the provided generic Secp256k1
     /// public key
     pub fn new_uncompressed(key: impl Into<secp256k1::PublicKey>) -> PublicKey {
-        PublicKey {
-            compressed: false,
-            inner: key.into(),
-        }
+        PublicKey { compressed: false, inner: key.into() }
     }
 
     fn with_serialized<R, F: FnOnce(&[u8]) -> R>(&self, f: F) -> R {
@@ -130,7 +125,7 @@ impl PublicKey {
     pub fn wpubkey_hash(&self) -> Option<WPubkeyHash> {
         if self.compressed {
             Some(WPubkeyHash::from_byte_array(
-                hash160::Hash::hash(&self.inner.serialize()).to_byte_array()
+                hash160::Hash::hash(&self.inner.serialize()).to_byte_array(),
             ))
         } else {
             // We can't create witness pubkey hashes for an uncompressed
@@ -249,26 +244,25 @@ impl PublicKey {
         let compressed = match data.len() {
             33 => true,
             65 => false,
-            len =>  {
+            len => {
                 return Err(base58::Error::InvalidLength(len).into());
-            },
+            }
         };
 
         if !compressed && data[0] != 0x04 {
-            return Err(Error::InvalidKeyPrefix(data[0]))
+            return Err(Error::InvalidKeyPrefix(data[0]));
         }
 
-        Ok(PublicKey {
-            compressed,
-            inner: secp256k1::PublicKey::from_slice(data)?,
-        })
+        Ok(PublicKey { compressed, inner: secp256k1::PublicKey::from_slice(data)? })
     }
 
     /// Computes the public key as supposed to be used with this secret
-    pub fn from_private_key<C: secp256k1::Signing>(secp: &Secp256k1<C>, sk: &PrivateKey) -> PublicKey {
+    pub fn from_private_key<C: secp256k1::Signing>(
+        secp: &Secp256k1<C>,
+        sk: &PrivateKey,
+    ) -> PublicKey {
         sk.public_key(secp)
     }
-
 }
 
 /// An opaque return type for PublicKey::to_sort_key
@@ -320,28 +314,20 @@ impl PrivateKey {
     /// Constructs compressed ECDSA private key from the provided generic Secp256k1 private key
     /// and the specified network
     pub fn new(key: secp256k1::SecretKey, network: Network) -> PrivateKey {
-        PrivateKey {
-            compressed: true,
-            network,
-            inner: key,
-        }
+        PrivateKey { compressed: true, network, inner: key }
     }
 
     /// Constructs uncompressed (legacy) ECDSA private key from the provided generic Secp256k1
     /// private key and the specified network
     pub fn new_uncompressed(key: secp256k1::SecretKey, network: Network) -> PrivateKey {
-        PrivateKey {
-            compressed: false,
-            network,
-            inner: key,
-        }
+        PrivateKey { compressed: false, network, inner: key }
     }
 
     /// Creates a public key from this private key
     pub fn public_key<C: secp256k1::Signing>(&self, secp: &Secp256k1<C>) -> PublicKey {
         PublicKey {
             compressed: self.compressed,
-            inner: secp256k1::PublicKey::from_secret_key(secp, &self.inner)
+            inner: secp256k1::PublicKey::from_secret_key(secp, &self.inner),
         }
     }
 
@@ -359,8 +345,8 @@ impl PrivateKey {
     pub fn fmt_wif(&self, fmt: &mut dyn fmt::Write) -> fmt::Result {
         let mut ret = [0; 34];
         ret[0] = match self.network {
-            Network::Dogecoin => 128,
-            Network::Testnet | Network::Signet | Network::Regtest => 239,
+            Network::Dogecoin => 158,
+            Network::Testnet | Network::Signet | Network::Regtest => 241,
         };
         ret[1..33].copy_from_slice(&self.inner[..]);
         let privkey = if self.compressed {
@@ -393,9 +379,9 @@ impl PrivateKey {
         };
 
         let network = match data[0] {
-            128 => Network::Dogecoin,
-            239 => Network::Testnet,
-            x   => {
+            158 => Network::Dogecoin,
+            241 => Network::Testnet,
+            x => {
                 return Err(Error::Base58(base58::Error::InvalidAddressVersion(x)));
             }
         };
@@ -613,7 +599,11 @@ pub trait TapTweak {
     ///
     /// # Returns
     /// The tweaked key and its parity.
-    fn tap_tweak<C: Verification>(self, secp: &Secp256k1<C>, merkle_root: Option<TapNodeHash>) -> Self::TweakedAux;
+    fn tap_tweak<C: Verification>(
+        self,
+        secp: &Secp256k1<C>,
+        merkle_root: Option<TapNodeHash>,
+    ) -> Self::TweakedAux;
 
     /// Directly converts an [`UntweakedPublicKey`] to a [`TweakedPublicKey`]
     ///
@@ -638,7 +628,11 @@ impl TapTweak for UntweakedPublicKey {
     ///
     /// # Returns
     /// The tweaked key and its parity.
-    fn tap_tweak<C: Verification>(self, secp: &Secp256k1<C>, merkle_root: Option<TapNodeHash>) -> (TweakedPublicKey, Parity) {
+    fn tap_tweak<C: Verification>(
+        self,
+        secp: &Secp256k1<C>,
+        merkle_root: Option<TapNodeHash>,
+    ) -> (TweakedPublicKey, Parity) {
         let tweak = TapTweakHash::from_key_and_tweak(self, merkle_root).to_scalar();
         let (output_key, parity) = self.add_tweak(secp, &tweak).expect("Tap tweak failed");
 
@@ -667,7 +661,11 @@ impl TapTweak for UntweakedKeyPair {
     ///
     /// # Returns
     /// The tweaked key and its parity.
-    fn tap_tweak<C: Verification>(self, secp: &Secp256k1<C>, merkle_root: Option<TapNodeHash>) -> TweakedKeyPair {
+    fn tap_tweak<C: Verification>(
+        self,
+        secp: &Secp256k1<C>,
+        merkle_root: Option<TapNodeHash>,
+    ) -> TweakedKeyPair {
         let (pubkey, _parity) = XOnlyPublicKey::from_keypair(&self);
         let tweak = TapTweakHash::from_key_and_tweak(pubkey, merkle_root).to_scalar();
         let tweaked = self.add_xonly_tweak(secp, &tweak).expect("Tap tweak failed");
@@ -768,13 +766,14 @@ mod tests {
     use crate::address::Address;
     use crate::hashes::hex::FromHex;
     use crate::io;
-    use crate::network::constants::Network::Testnet;
     use crate::network::constants::Network::Dogecoin;
+    use crate::network::constants::Network::Testnet;
 
     #[test]
     fn test_key_derivation() {
         // testnet compressed
-        let sk = PrivateKey::from_wif("cVt4o7BGAig1UXywgGSmARhxMdzP5qvQsxKkSsc1XEkw3tDTQFpy").unwrap();
+        let sk =
+            PrivateKey::from_wif("cVt4o7BGAig1UXywgGSmARhxMdzP5qvQsxKkSsc1XEkw3tDTQFpy").unwrap();
         assert_eq!(sk.network, Testnet);
         assert!(sk.compressed);
         assert_eq!(&sk.to_wif(), "cVt4o7BGAig1UXywgGSmARhxMdzP5qvQsxKkSsc1XEkw3tDTQFpy");
@@ -790,7 +789,8 @@ mod tests {
         assert_eq!(&sk.to_wif(), &sk_str.to_wif());
 
         // mainnet uncompressed
-        let sk = PrivateKey::from_wif("5JYkZjmN7PVMjJUfJWfRFwtuXTGB439XV6faajeHPAM9Z2PT2R3").unwrap();
+        let sk =
+            PrivateKey::from_wif("5JYkZjmN7PVMjJUfJWfRFwtuXTGB439XV6faajeHPAM9Z2PT2R3").unwrap();
         assert_eq!(sk.network, Dogecoin);
         assert!(!sk.compressed);
         assert_eq!(&sk.to_wif(), "5JYkZjmN7PVMjJUfJWfRFwtuXTGB439XV6faajeHPAM9Z2PT2R3");
@@ -803,13 +803,25 @@ mod tests {
         let addr = Address::p2pkh(&pk, sk.network);
         assert_eq!(&addr.to_string(), "1GhQvF6dL8xa6wBxLnWmHcQsurx9RxiMc8");
         pk.compressed = true;
-        assert_eq!(&pk.to_string(), "032e58afe51f9ed8ad3cc7897f634d881fdbe49a81564629ded8156bebd2ffd1af");
-        assert_eq!(pk, PublicKey::from_str("032e58afe51f9ed8ad3cc7897f634d881fdbe49a81564629ded8156bebd2ffd1af").unwrap());
+        assert_eq!(
+            &pk.to_string(),
+            "032e58afe51f9ed8ad3cc7897f634d881fdbe49a81564629ded8156bebd2ffd1af"
+        );
+        assert_eq!(
+            pk,
+            PublicKey::from_str(
+                "032e58afe51f9ed8ad3cc7897f634d881fdbe49a81564629ded8156bebd2ffd1af"
+            )
+            .unwrap()
+        );
     }
 
     #[test]
     fn test_pubkey_hash() {
-        let pk = PublicKey::from_str("032e58afe51f9ed8ad3cc7897f634d881fdbe49a81564629ded8156bebd2ffd1af").unwrap();
+        let pk = PublicKey::from_str(
+            "032e58afe51f9ed8ad3cc7897f634d881fdbe49a81564629ded8156bebd2ffd1af",
+        )
+        .unwrap();
         let upk = PublicKey::from_str("042e58afe51f9ed8ad3cc7897f634d881fdbe49a81564629ded8156bebd2ffd1af191923a2964c177f5b5923ae500fca49e99492d534aa3759d6b25a8bc971b133").unwrap();
         assert_eq!(pk.pubkey_hash().to_string(), "9511aa27ef39bbfa4e4f3dd15f4d66ea57f475b4");
         assert_eq!(upk.pubkey_hash().to_string(), "ac2e7daf42d2c97418fd9f78af2de552bb9c6a7a");
@@ -817,16 +829,22 @@ mod tests {
 
     #[test]
     fn test_wpubkey_hash() {
-        let pk = PublicKey::from_str("032e58afe51f9ed8ad3cc7897f634d881fdbe49a81564629ded8156bebd2ffd1af").unwrap();
+        let pk = PublicKey::from_str(
+            "032e58afe51f9ed8ad3cc7897f634d881fdbe49a81564629ded8156bebd2ffd1af",
+        )
+        .unwrap();
         let upk = PublicKey::from_str("042e58afe51f9ed8ad3cc7897f634d881fdbe49a81564629ded8156bebd2ffd1af191923a2964c177f5b5923ae500fca49e99492d534aa3759d6b25a8bc971b133").unwrap();
-        assert_eq!(pk.wpubkey_hash().unwrap().to_string(), "9511aa27ef39bbfa4e4f3dd15f4d66ea57f475b4");
+        assert_eq!(
+            pk.wpubkey_hash().unwrap().to_string(),
+            "9511aa27ef39bbfa4e4f3dd15f4d66ea57f475b4"
+        );
         assert_eq!(upk.wpubkey_hash(), None);
     }
 
     #[cfg(feature = "serde")]
     #[test]
     fn test_key_serde() {
-        use serde_test::{Configure, Token, assert_tokens};
+        use serde_test::{assert_tokens, Configure, Token};
 
         static KEY_WIF: &str = "cVt4o7BGAig1UXywgGSmARhxMdzP5qvQsxKkSsc1XEkw3tDTQFpy";
         static PK_STR: &str = "039b6347398505f5ec93826dc61c19f47c66c0283ee9be980e29ce325a0f4679ef";
@@ -836,31 +854,22 @@ mod tests {
             87288ed73ce47fc4f5c79d19ebfa57da7cff3aff6e819e4ee971d86b5e61875d\
         ";
         static PK_BYTES: [u8; 33] = [
-            0x03,
-            0x9b, 0x63, 0x47, 0x39, 0x85, 0x05, 0xf5, 0xec,
-            0x93, 0x82, 0x6d, 0xc6, 0x1c, 0x19, 0xf4, 0x7c,
-            0x66, 0xc0, 0x28, 0x3e, 0xe9, 0xbe, 0x98, 0x0e,
-            0x29, 0xce, 0x32, 0x5a, 0x0f, 0x46, 0x79, 0xef,
+            0x03, 0x9b, 0x63, 0x47, 0x39, 0x85, 0x05, 0xf5, 0xec, 0x93, 0x82, 0x6d, 0xc6, 0x1c,
+            0x19, 0xf4, 0x7c, 0x66, 0xc0, 0x28, 0x3e, 0xe9, 0xbe, 0x98, 0x0e, 0x29, 0xce, 0x32,
+            0x5a, 0x0f, 0x46, 0x79, 0xef,
         ];
         static PK_BYTES_U: [u8; 65] = [
-            0x04,
-            0x9b, 0x63, 0x47, 0x39, 0x85, 0x05, 0xf5, 0xec,
-            0x93, 0x82, 0x6d, 0xc6, 0x1c, 0x19, 0xf4, 0x7c,
-            0x66, 0xc0, 0x28, 0x3e, 0xe9, 0xbe, 0x98, 0x0e,
-            0x29, 0xce, 0x32, 0x5a, 0x0f, 0x46, 0x79, 0xef,
-            0x87, 0x28, 0x8e, 0xd7, 0x3c, 0xe4, 0x7f, 0xc4,
-            0xf5, 0xc7, 0x9d, 0x19, 0xeb, 0xfa, 0x57, 0xda,
-            0x7c, 0xff, 0x3a, 0xff, 0x6e, 0x81, 0x9e, 0x4e,
-            0xe9, 0x71, 0xd8, 0x6b, 0x5e, 0x61, 0x87, 0x5d,
+            0x04, 0x9b, 0x63, 0x47, 0x39, 0x85, 0x05, 0xf5, 0xec, 0x93, 0x82, 0x6d, 0xc6, 0x1c,
+            0x19, 0xf4, 0x7c, 0x66, 0xc0, 0x28, 0x3e, 0xe9, 0xbe, 0x98, 0x0e, 0x29, 0xce, 0x32,
+            0x5a, 0x0f, 0x46, 0x79, 0xef, 0x87, 0x28, 0x8e, 0xd7, 0x3c, 0xe4, 0x7f, 0xc4, 0xf5,
+            0xc7, 0x9d, 0x19, 0xeb, 0xfa, 0x57, 0xda, 0x7c, 0xff, 0x3a, 0xff, 0x6e, 0x81, 0x9e,
+            0x4e, 0xe9, 0x71, 0xd8, 0x6b, 0x5e, 0x61, 0x87, 0x5d,
         ];
 
         let s = Secp256k1::new();
         let sk = PrivateKey::from_str(KEY_WIF).unwrap();
         let pk = PublicKey::from_private_key(&s, &sk);
-        let pk_u = PublicKey {
-            inner: pk.inner,
-            compressed: false,
-        };
+        let pk_u = PublicKey { inner: pk.inner, compressed: false };
 
         assert_tokens(&sk, &[Token::BorrowedStr(KEY_WIF)]);
         assert_tokens(&pk.compact(), &[Token::BorrowedBytes(&PK_BYTES[..])]);
@@ -920,26 +929,29 @@ mod tests {
 
     #[test]
     fn pubkey_to_sort_key() {
-        let key1 = PublicKey::from_str("02ff12471208c14bd580709cb2358d98975247d8765f92bc25eab3b2763ed605f8").unwrap();
-        let key2 = PublicKey {
-            inner: key1.inner,
-            compressed: false,
-        };
+        let key1 = PublicKey::from_str(
+            "02ff12471208c14bd580709cb2358d98975247d8765f92bc25eab3b2763ed605f8",
+        )
+        .unwrap();
+        let key2 = PublicKey { inner: key1.inner, compressed: false };
         let expected1 = SortKey(
             2,
             <[u8; 32]>::from_hex(
                 "ff12471208c14bd580709cb2358d98975247d8765f92bc25eab3b2763ed605f8",
-            ).unwrap(),
+            )
+            .unwrap(),
             [0_u8; 32],
         );
         let expected2 = SortKey(
             4,
             <[u8; 32]>::from_hex(
                 "ff12471208c14bd580709cb2358d98975247d8765f92bc25eab3b2763ed605f8",
-            ).unwrap(),
+            )
+            .unwrap(),
             <[u8; 32]>::from_hex(
                 "1794e7f3d5e420641a3bc690067df5541470c966cbca8c694bf39aa16d836918",
-            ).unwrap(),
+            )
+            .unwrap(),
         );
         assert_eq!(key1.to_sort_key(), expected1);
         assert_eq!(key2.to_sort_key(), expected2);
@@ -951,9 +963,8 @@ mod tests {
             input: Vec<PublicKey>,
             expect: Vec<PublicKey>,
         }
-        let fmt = |v: Vec<_>| v.into_iter()
-            .map(|s| PublicKey::from_str(s).unwrap())
-            .collect::<Vec<_>>();
+        let fmt =
+            |v: Vec<_>| v.into_iter().map(|s| PublicKey::from_str(s).unwrap()).collect::<Vec<_>>();
         let vectors = vec![
             // Start BIP67 vectors
             // Vector 1
